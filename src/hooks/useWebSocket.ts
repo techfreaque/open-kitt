@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 
 interface UseWebSocketOptions {
   url: string;
@@ -13,7 +14,9 @@ interface UseWebSocketOptions {
   onError?: (error: Error) => void;
 }
 
-export function useWebSocket<T extends Record<string, any>>(options: UseWebSocketOptions) {
+export function useWebSocket<T extends Record<string, any>>(
+  options: UseWebSocketOptions,
+) {
   const {
     url,
     autoConnect = true,
@@ -32,24 +35,26 @@ export function useWebSocket<T extends Record<string, any>>(options: UseWebSocke
 
   // Initialize socket connection
   const connect = useCallback(() => {
-    if (socketRef.current) return;
+    if (socketRef.current) {
+      return;
+    }
 
     try {
       socketRef.current = io(url, {
         reconnection: false, // We'll handle reconnection manually
-        transports: ['websocket'],
+        transports: ["websocket"],
       });
 
-      socketRef.current.on('connect', () => {
+      socketRef.current.on("connect", () => {
         setIsConnected(true);
         reconnectCountRef.current = 0;
         onConnect?.();
       });
 
-      socketRef.current.on('disconnect', () => {
+      socketRef.current.on("disconnect", () => {
         setIsConnected(false);
         onDisconnect?.();
-        
+
         // Handle reconnection
         if (reconnectCountRef.current < reconnectionAttempts) {
           reconnectTimerRef.current = setTimeout(() => {
@@ -61,9 +66,9 @@ export function useWebSocket<T extends Record<string, any>>(options: UseWebSocke
         }
       });
 
-      socketRef.current.on('connect_error', (error) => {
+      socketRef.current.on("connect_error", (error) => {
         onError?.(error);
-        
+
         // Handle reconnection
         if (reconnectCountRef.current < reconnectionAttempts) {
           reconnectTimerRef.current = setTimeout(() => {
@@ -77,7 +82,14 @@ export function useWebSocket<T extends Record<string, any>>(options: UseWebSocke
     } catch (error) {
       onError?.(error instanceof Error ? error : new Error(String(error)));
     }
-  }, [url, reconnectionAttempts, reconnectionDelay, onConnect, onDisconnect, onError]);
+  }, [
+    url,
+    reconnectionAttempts,
+    reconnectionDelay,
+    onConnect,
+    onDisconnect,
+    onError,
+  ]);
 
   // Disconnect socket
   const disconnect = useCallback(() => {
@@ -85,47 +97,57 @@ export function useWebSocket<T extends Record<string, any>>(options: UseWebSocke
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = null;
     }
-    
+
     if (socketRef.current) {
       socketRef.current.disconnect();
       socketRef.current = null;
     }
-    
+
     setIsConnected(false);
   }, []);
 
   // Subscribe to an event
-  const subscribe = useCallback(<K extends keyof T>(event: K, callback: (data: T[K]) => void) => {
-    if (!socketRef.current) return () => {};
-    
-    socketRef.current.on(event as string, callback as any);
-    
-    return () => {
-      socketRef.current?.off(event as string, callback as any);
-    };
-  }, []);
+  const subscribe = useCallback(
+    <K extends keyof T>(event: K, callback: (data: T[K]) => void) => {
+      if (!socketRef.current) {
+        return () => {};
+      }
+
+      socketRef.current.on(event as string, callback as any);
+
+      return () => {
+        socketRef.current?.off(event as string, callback as any);
+      };
+    },
+    [],
+  );
 
   // Emit an event
   const emit = useCallback(<K extends string>(event: K, data?: any) => {
-    if (!socketRef.current) return false;
+    if (!socketRef.current) {
+      return false;
+    }
     socketRef.current.emit(event, data);
     return true;
   }, []);
 
   // Update events state when receiving data
-  const updateEvents = useCallback(<K extends keyof T>(event: K, data: T[K]) => {
-    setEvents(prev => ({
-      ...prev,
-      [event]: data
-    }));
-  }, []);
+  const updateEvents = useCallback(
+    <K extends keyof T>(event: K, data: T[K]) => {
+      setEvents((prev) => ({
+        ...prev,
+        [event]: data,
+      }));
+    },
+    [],
+  );
 
   // Connect on mount if autoConnect is true
   useEffect(() => {
     if (autoConnect) {
       connect();
     }
-    
+
     return () => {
       disconnect();
     };

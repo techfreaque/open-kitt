@@ -4,10 +4,9 @@
   "description": "Setup scripts for OpenCar dashboard",
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "install-deps": "node dist/install-dependencies.js",
-    "setup-can": "node dist/setup-can.js",
-    "setup-system": "node dist/setup-system.js",
+    "install-deps": "tsx stc/install-dependencies.ts",
+    "setup-can": "tsx src/setup-can.ts",
+    "setup-system": "tsx src/setup-system.ts",
     "setup-all": "npm run install-deps && npm run setup-can && npm run setup-system"
   },
   "dependencies": {
@@ -15,7 +14,8 @@
     "commander": "^11.1.0",
     "execa": "^5.1.1",
     "fs-extra": "^11.2.0",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "tsx": "^4.19.3"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

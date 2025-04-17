@@ -1,13 +1,22 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Wifi, WifiOff, Lock, LockOpen, RefreshCw } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Lock, LockOpen, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 
 interface WiFiNetwork {
   ssid: string;
@@ -24,8 +33,10 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
   const [enabled, setEnabled] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [networks, setNetworks] = useState<WiFiNetwork[]>([]);
-  const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork | null>(null);
-  const [password, setPassword] = useState('');
+  const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork | null>(
+    null,
+  );
+  const [password, setPassword] = useState("");
   const [connecting, setConnecting] = useState(false);
 
   // Scan for networks using the backend API
@@ -34,10 +45,10 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
 
     try {
       // Call the backend API to scan for networks
-      const response = await fetch('/api/wifi/scan', {
-        method: 'POST',
+      const response = await fetch("/api/wifi/scan", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -48,7 +59,7 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
       const data = await response.json();
       setNetworks(data.networks);
     } catch (error) {
-      console.error('Failed to scan networks:', error);
+      console.error("Failed to scan networks:", error);
       // Fallback to empty networks list
       setNetworks([]);
     } finally {
@@ -74,16 +85,16 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
     // Simulate connection delay
     setTimeout(() => {
       // Update networks to show connected status
-      setNetworks(prev =>
-        prev.map(n => ({
+      setNetworks((prev) =>
+        prev.map((n) => ({
           ...n,
-          connected: n.ssid === network.ssid
-        }))
+          connected: n.ssid === network.ssid,
+        })),
       );
 
       setConnecting(false);
       setSelectedNetwork(null);
-      setPassword('');
+      setPassword("");
     }, 2000);
   };
 
@@ -95,31 +106,33 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
     }
 
     // Update networks to show disconnected status
-    setNetworks(prev =>
-      prev.map(n => ({
+    setNetworks((prev) =>
+      prev.map((n) => ({
         ...n,
-        connected: n.ssid === network.ssid ? false : n.connected
-      }))
+        connected: n.ssid === network.ssid ? false : n.connected,
+      })),
     );
   };
 
   // Connect with password
   const connectWithPassword = async () => {
-    if (!selectedNetwork) return;
+    if (!selectedNetwork) {
+      return;
+    }
 
     setConnecting(true);
 
     try {
       // Call the backend API to connect to the network
-      const response = await fetch('/api/wifi/connect', {
-        method: 'POST',
+      const response = await fetch("/api/wifi/connect", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ssid: selectedNetwork.ssid,
-          password: password,
-          secure: selectedNetwork.secure
+          password,
+          secure: selectedNetwork.secure,
         }),
       });
 
@@ -131,23 +144,25 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
 
       if (data.success) {
         // Update networks to show connected status
-        setNetworks(prev =>
-          prev.map(n => ({
+        setNetworks((prev) =>
+          prev.map((n) => ({
             ...n,
-            connected: n.ssid === selectedNetwork.ssid
-          }))
+            connected: n.ssid === selectedNetwork.ssid,
+          })),
         );
       } else {
-        throw new Error(data.error || 'Failed to connect to network');
+        throw new Error(data.error || "Failed to connect to network");
       }
     } catch (error) {
-      console.error('Failed to connect to network:', error);
+      console.error("Failed to connect to network:", error);
       // Show error to user
-      alert(`Failed to connect: ${error instanceof Error ? error.message : String(error)}`);
+      alert(
+        `Failed to connect: ${error instanceof Error ? error.message : String(error)}`,
+      );
     } finally {
       setConnecting(false);
       setSelectedNetwork(null);
-      setPassword('');
+      setPassword("");
     }
   };
 
@@ -161,11 +176,11 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
   // Get signal strength icon
   const getSignalIcon = (signal: number) => {
     if (signal >= 70) {
-      return 'bg-green-500';
+      return "bg-green-500";
     } else if (signal >= 40) {
-      return 'bg-yellow-500';
+      return "bg-yellow-500";
     } else {
-      return 'bg-red-500';
+      return "bg-red-500";
     }
   };
 
@@ -177,15 +192,12 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
             <Wifi className="h-5 w-5" />
             WiFi Settings
           </div>
-          <Switch
-            checked={enabled}
-            onCheckedChange={setEnabled}
-          />
+          <Switch checked={enabled} onCheckedChange={setEnabled} />
         </CardTitle>
         <CardDescription>
           {enabled
-            ? 'Connect to available WiFi networks'
-            : 'WiFi is currently disabled'}
+            ? "Connect to available WiFi networks"
+            : "WiFi is currently disabled"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -204,7 +216,7 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
                       <div
                         className={cn(
                           "absolute bottom-0 right-0 w-2 h-2 rounded-full",
-                          getSignalIcon(network.signal)
+                          getSignalIcon(network.signal),
                         )}
                       />
                     </div>
@@ -223,7 +235,9 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
                           </>
                         )}
                         {network.connected && (
-                          <span className="ml-2 text-green-500">• Connected</span>
+                          <span className="ml-2 text-green-500">
+                            • Connected
+                          </span>
                         )}
                       </div>
                     </div>
@@ -231,12 +245,13 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
                   <Button
                     variant={network.connected ? "destructive" : "default"}
                     size="sm"
-                    onClick={() => network.connected
-                      ? disconnectFromNetwork(network)
-                      : connectToNetwork(network)
+                    onClick={() =>
+                      network.connected
+                        ? disconnectFromNetwork(network)
+                        : connectToNetwork(network)
                     }
                   >
-                    {network.connected ? 'Disconnect' : 'Connect'}
+                    {network.connected ? "Disconnect" : "Connect"}
                   </Button>
                 </div>
               ))}
@@ -258,7 +273,9 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
             {/* Password dialog */}
             {selectedNetwork && (
               <div className="border rounded-lg p-4 space-y-4">
-                <div className="font-medium">Connect to {selectedNetwork.ssid}</div>
+                <div className="font-medium">
+                  Connect to {selectedNetwork.ssid}
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="wifi-password">Password</Label>
                   <Input
@@ -266,7 +283,9 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
                     type="password"
                     placeholder="Enter network password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPassword(e.target.value)
+                    }
                   />
                 </div>
                 <div className="flex justify-end gap-2">
@@ -274,7 +293,7 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
                     variant="outline"
                     onClick={() => {
                       setSelectedNetwork(null);
-                      setPassword('');
+                      setPassword("");
                     }}
                   >
                     Cancel
@@ -283,7 +302,7 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
                     onClick={connectWithPassword}
                     disabled={!password || connecting}
                   >
-                    {connecting ? 'Connecting...' : 'Connect'}
+                    {connecting ? "Connecting..." : "Connect"}
                   </Button>
                 </div>
               </div>
@@ -305,8 +324,10 @@ export function WiFiSettings({ className }: WiFiSettingsProps) {
           onClick={scanNetworks}
           disabled={!enabled || scanning}
         >
-          <RefreshCw className={cn("h-3.5 w-3.5", scanning && "animate-spin")} />
-          {scanning ? 'Scanning...' : 'Scan'}
+          <RefreshCw
+            className={cn("h-3.5 w-3.5", scanning && "animate-spin")}
+          />
+          {scanning ? "Scanning..." : "Scan"}
         </Button>
       </CardFooter>
     </Card>

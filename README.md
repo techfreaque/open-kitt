@@ -5,7 +5,7 @@ A modern car dashboard application with CAN bus integration and Android Auto sup
 ## Features
 
 - **Modern UI**: Built with Next.js and shadcn/ui components
-- **CAN Bus Integration**: Real-time vehicle data via WebSockets
+- **CAN Bus Integration**: Real-time vehicle data via Next.js API routes
 - **System Monitoring**: CPU, memory, storage, and network monitoring
 - **Android Auto Support**: Integration with Android Auto for navigation and media
 - **Responsive Design**: Works on various screen sizes
@@ -23,12 +23,15 @@ A modern car dashboard application with CAN bus integration and Android Auto sup
 ```
 open-car/
 ├── src/                  # Frontend Next.js app
-├── server/               # Backend TypeScript server
-│   ├── src/              # Server source code
-│   │   ├── can/          # CAN bus integration
-│   │   ├── system/       # System management
-│   │   └── websocket/    # WebSocket server
-│   └── dist/             # Compiled server code
+│   ├── app/              # Next.js app directory
+│   │   ├── api/          # API routes for server-side operations
+│   │   │   ├── can/      # CAN bus API endpoints
+│   │   │   └── system/   # System API endpoints
+│   │   └── page.tsx      # Main dashboard page
+│   ├── components/       # React components
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Utility functions
+│   └── types/            # TypeScript type definitions
 ├── setup/                # System setup scripts
 │   ├── src/              # Setup script source code
 │   └── dist/             # Compiled setup scripts
@@ -47,15 +50,10 @@ cd open-car
 ### 2. Install dependencies
 
 ```bash
-# Install root dependencies
+# Install dependencies
 npm install
 
-# Install server dependencies
-cd server
-npm install
-cd ..
-
-# Install setup dependencies
+# Install setup dependencies (if needed)
 cd setup
 npm install
 cd ..
@@ -82,23 +80,15 @@ sudo npm run setup:system  # Set up system services only
 ### 5. Start the application
 
 ```bash
-# Start everything
-npm run start:all
-
-# Or start components individually
-npm run start        # Start frontend
-npm run start:server # Start backend
+# Start the application
+npm run start
 ```
 
 ## Development
 
 ```bash
-# Run development servers
-npm run dev:all
-
-# Or run components individually
-npm run dev        # Run frontend in development mode
-npm run dev:server # Run backend in development mode
+# Run development server
+npm run dev
 ```
 
 ## CAN Bus Configuration
@@ -115,6 +105,21 @@ The setup process creates the following systemd services:
 
 - `can-setup.service`: Sets up the CAN bus interface on boot
 - `open-car.service`: Starts the OpenCar dashboard application on boot
+
+## API Routes
+
+The application uses Next.js API routes to handle server-side operations:
+
+### CAN Bus
+
+- `GET /api/can/status` - Get the current status of the CAN bus
+- `POST /api/can/connect` - Connect to the CAN bus
+- `POST /api/can/disconnect` - Disconnect from the CAN bus
+
+### System
+
+- `GET /api/system/info` - Get system information (CPU, memory, storage, network)
+- `POST /api/system/execute` - Execute a system command (whitelist restricted)
 
 ## License
 
